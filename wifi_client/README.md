@@ -3,6 +3,8 @@
 
 This example project demonstrates how to connect to a wifi AP.
 
+It is assumed you have cloned the esp32_components repo in $HOME/esp/esp32_components
+
 ### Configuration
 
 The project is configured by adding a file `nvs_config.csv` to the project root
