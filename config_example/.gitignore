@@ -1,4 +1,5 @@
 nvs_config.csv
 build/
 *build/
+*.log
 *.old

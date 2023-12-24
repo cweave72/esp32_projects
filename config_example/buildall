@@ -26,6 +26,7 @@ fi
 PORT="/dev/ttyUSB0"
 export IDF_TARGET=esp32
 export COMPONENTS_PATH=$HOME/esp/esp32_components
+export ESP32_TOOLS=$HOME/esp/esp32_tools
 
 
 function build {
