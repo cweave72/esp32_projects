@@ -1,0 +1,22 @@
+header:
+  seqn: 10
+  no_reply: false 
+
+test_callset:
+    setstruct_call:
+      var_int32: -123456
+      var_uint32: 9094
+      var_int64: 0x5430984560
+      var_uint64: 0x012893456
+      var_uint32_array:
+        - 0
+        - 1
+        - 4098
+        - 59843
+      var_bool: true
+      var_string: "hello"
+        #var_bytes: !!binary "123adef12344==========="
+    #add_call:
+    #    a: 50
+    #    b: 51
+

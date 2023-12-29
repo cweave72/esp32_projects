@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+import 'ProtoRpc.proto';
+import 'TestRpc.proto';
+
+message RpcFrame {
+    ProtoRpcHeader header = 1;
+
+    oneof callset {
+        test.TestCallset test_callset = 2;
+    }
+}
