@@ -11,7 +11,6 @@ PROTO_INC="\
 loglevel=info
 yaml_data=$SCRIPTPATH/config.yaml
 proto_file=$SCRIPTPATH/main/Config.proto
-module=Config
 msgclass=Config
 # Must use a absolute path that can be specified in nvs_config.csv
 out_file=/tmp/espressif/build_tmp/config.bin
@@ -25,7 +24,6 @@ config_gen \
     --loglevel=$loglevel \
     write \
     $PROTO_INC \
-    --mod $module \
     --msgcls $msgclass \
     --yamlfile $yaml_data \
     --out $out_file \

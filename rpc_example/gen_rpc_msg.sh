@@ -14,7 +14,6 @@ PROTO_INC="\
 loglevel=debug
 yaml_data=$SCRIPTPATH/rpc_msg.yaml
 proto_file=$SCRIPTPATH/main/ProtoRpcApp.proto
-module=ProtoRpcApp
 msgclass=RpcFrame
 # Must use a absolute path that can be specified in nvs_config.csv
 out_file=/tmp/espressif/build_tmp/rpc_msg.bin
@@ -28,7 +27,6 @@ config_gen \
     --loglevel=$loglevel \
     write \
     $PROTO_INC \
-    --mod $module \
     --msgcls $msgclass \
     --yamlfile $yaml_data \
     --out $out_file \
