@@ -49,11 +49,7 @@ extern const pb_msgdesc_t RpcFrame_msg;
 #define RpcFrame_fields &RpcFrame_msg
 
 /* Maximum encoded size of messages (where known) */
-#if defined(test_TestCallset_size)
-#endif
-#if defined(test_TestCallset_size)
-#define RpcFrame_size                            (18 + test_TestCallset_size)
-#endif
+#define RpcFrame_size                            140
 
 #ifdef __cplusplus
 } /* extern "C" */

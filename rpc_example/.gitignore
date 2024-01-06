@@ -1,0 +1,7 @@
+config.yaml
+*.log
+**/.venv
+**/*.egg-info
+**/__pycache__
+python/config
+python/rpc/lib
