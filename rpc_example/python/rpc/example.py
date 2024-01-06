@@ -26,7 +26,8 @@ def main():
         var_bool=True,
         var_uint32_array=[0, 1, 23, 4, 5, 6, 8, 123456789],
         var_string="hello world, th",
-        var_bytes=b'asdfjkl;'
+        var_bytes=b'asdfjkl;',
+        no_reply=False
     )
 
     conn.close()

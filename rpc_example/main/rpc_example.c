@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include "nvs_flash.h"
-#include "esp_log.h"
 #include "ProtoRpc.h"
 #include "TestRpc.h"
 #include "PbGeneric.h"
+#include "LogPrint.h"
 #include "ProtoRpcApp.pb.h"
 #include "Config.pb.h"
 
@@ -13,12 +13,6 @@
 
 static const char *TAG = "[app]";
 static Config config;
-
-#define LOGE_PRINT(fmt, ...) \
-    ESP_LOGE(TAG, "(l:%u) " fmt, __LINE__, ##__VA_ARGS__)
-
-#define LOGI_PRINT(fmt, ...) \
-    ESP_LOGI(TAG, "(l:%u) " fmt, __LINE__, ##__VA_ARGS__)
 
 static ProtoRpc_Resolver_Entry resolvers[] = {
     PROTORPC_ADD_CALLSET(RpcFrame_test_callset_tag, TestRpc_resolver)
@@ -58,33 +52,33 @@ get_config(void)
     ret = nvs_open("config", NVS_READONLY, &handle);
     if (ret != ESP_OK)
     {
-        LOGE_PRINT("Error (%s) opening NVS handle!\n", esp_err_to_name(ret));
+        LOGPRINT_ERROR("Error (%s) opening NVS handle!\n", esp_err_to_name(ret));
         return -1;
     }
-    LOGI_PRINT("The NVS handle successfully opened");
+    LOGPRINT_INFO("The NVS handle successfully opened");
 
     ret = nvs_get_blob(handle, "config.bin", NULL, &len);
     if (ret != ESP_OK)
     {
-        LOGE_PRINT("Error (%s) getting blob len.\n", esp_err_to_name(ret));
+        LOGPRINT_ERROR("Error (%s) getting blob len.\n", esp_err_to_name(ret));
         return -1;
     }
-    LOGI_PRINT("blob len = %u", len);
+    LOGPRINT_INFO("blob len = %u", len);
 
     ret = nvs_get_blob(handle, "config.bin", blob, &len);
     if (ret != ESP_OK)
     {
-        LOGE_PRINT("Error (%s) getting blob.\n", esp_err_to_name(ret));
+        LOGPRINT_ERROR("Error (%s) getting blob.\n", esp_err_to_name(ret));
         return -1;
     }
 
     Pb_unpack(blob, len, &config, (void *)Config_fields);
-    LOGI_PRINT("ssid = %s", wifi_config->ssid);
-    LOGI_PRINT("pass = %s", wifi_config->pass);
-    LOGI_PRINT("use_dhcp = %u", net_config->use_dhcp);
-    LOGI_PRINT("ip = %s", net_config->ip);
-    LOGI_PRINT("netmask = %s", net_config->netmask);
-    LOGI_PRINT("gw = %s", net_config->gw);
+    LOGPRINT_INFO("ssid = %s", wifi_config->ssid);
+    LOGPRINT_INFO("pass = %s", wifi_config->pass);
+    LOGPRINT_INFO("use_dhcp = %u", net_config->use_dhcp);
+    LOGPRINT_INFO("ip = %s", net_config->ip);
+    LOGPRINT_INFO("netmask = %s", net_config->netmask);
+    LOGPRINT_INFO("gw = %s", net_config->gw);
 
     return 0;
 }
@@ -105,7 +99,7 @@ rpc_server(void *p)
     ret = UdpSocket_init(&udp_sock, 13000, 10);
     if (ret < 0)
     {
-        LOGE_PRINT("Error initializing socket: %d", ret);
+        LOGPRINT_ERROR("Error initializing socket: %d", ret);
         return;
     }
     
@@ -118,7 +112,7 @@ rpc_server(void *p)
         if (len > 0)
         {
             UDPSOCKET_GET_ADDR(udp_sock.source_addr, addr_str);
-            LOGI_PRINT("Received %d bytes from %s:", len, addr_str);
+            LOGPRINT_INFO("Received %d bytes from %s:", len, addr_str);
 
             ProtoRpc_server(
                 &rpc_info,
@@ -135,12 +129,8 @@ rpc_server(void *p)
                 ret = UdpSocket_write(&udp_sock, (char *)reply_msg, reply_size);
                 if (ret == 0)
                 {
-                    LOGI_PRINT("Wrote %d bytes.", (unsigned int)reply_size);
+                    LOGPRINT_INFO("Wrote %d bytes.", (unsigned int)reply_size);
                 }
-            }
-            else
-            {
-                LOGE_PRINT("Rpc reply size is 0.");
             }
         }
         else if (len == 0)
@@ -184,7 +174,7 @@ void app_main(void)
         return;
     }
 
-    LOGI_PRINT("Wifi connect successfull.");
+    LOGPRINT_INFO("Wifi connect successfull.");
 
     xTaskCreate(rpc_server, "RPC svr", 4*1024, NULL, 10, &rpcThread);
 }
