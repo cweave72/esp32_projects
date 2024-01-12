@@ -1,3 +1,4 @@
+import sys
 import logging
 from rich.logging import RichHandler
 from rich import inspect
@@ -10,25 +11,29 @@ from rpc.lib import RpcFrame
 logger = logging.getLogger()
 
 
-def main():
+def main(ip):
 
-    conn = UdpConnection(addr='192.168.1.190', port=13000)
+    conn = UdpConnection(addr=ip, port=13000)
     conn.connect()
 
     api = build_api(RpcFrame, conn)
-    api['test_callset'].add(a=10, b=20)
-    api['test_callset'].handlererror()
-    api['test_callset'].setstruct(
-        var_int32=-55,
-        var_uint32=40001230,
-        var_int64=0x0000beefbeefbeef,
-        var_uint64=0x55,
-        var_bool=True,
-        var_uint32_array=[0, 1, 23, 4, 5, 6, 8, 123456789],
-        var_string="hello world, th",
-        var_bytes=b'asdfjkl;',
-        no_reply=False
-    )
+    api['rtosutils_callset'].get_system_tasks()
+
+    #api['test_callset'].add(a=10, b=20)
+    #api['test_callset'].handlererror()
+    #api['test_callset'].setstruct(
+    #    var_int32=-55,
+    #    var_uint32=40001230,
+    #    var_int64=0x0000beefbeefbeef,
+    #    var_uint64=0x55,
+    #    var_bool=True,
+    #    var_uint32_array=[0, 1, 23, 4, 5, 6, 8, 123456789],
+    #    var_string="hello world, th",
+    #    var_bytes=b'asdfjkl;',
+    #    no_reply=False
+    #)
+
+    #api['rtosutils_callset'].get_system_tasks()
 
     conn.close()
 
@@ -58,4 +63,4 @@ if __name__ == "__main__":
     ch.setLevel(logging.DEBUG)
     logger.addHandler(ch)
 
-    main()
+    main(sys.argv[1])

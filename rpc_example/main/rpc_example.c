@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "nvs_flash.h"
 #include "ProtoRpc.h"
-#include "TestRpc.h"
 #include "PbGeneric.h"
 #include "LogPrint.h"
 #include "ProtoRpcApp.pb.h"
@@ -14,8 +13,15 @@
 static const char *TAG = "[app]";
 static Config config;
 
+#include "TestRpc.h"
+#include "RtosUtilsRpc.h"
+
+/******************************************************************************/
+/** @brief RPC Declarations */
+
 static ProtoRpc_Resolver_Entry resolvers[] = {
-    PROTORPC_ADD_CALLSET(RpcFrame_test_callset_tag, TestRpc_resolver)
+    PROTORPC_ADD_CALLSET(RpcFrame_test_callset_tag, TestRpc_resolver),
+    PROTORPC_ADD_CALLSET(RpcFrame_rtosutils_callset_tag, RtosUtilsRpc_resolver),
 };
 
 #define NUM_RESOLVERS   PROTORPC_ARRAY_LENGTH(resolvers)
@@ -29,9 +35,11 @@ static ProtoRpc_info rpc_info = {
 
 static uint8_t rcv_msg[2*sizeof(RpcFrame)];
 static uint8_t reply_msg[2*sizeof(RpcFrame)];
+/******************************************************************************/
 
 static UdpSocket udp_sock;
 
+#define RPCSERVER_STACK_SIZE    4*1024
 static TaskHandle_t rpcThread;
 
 /******************************************************************************
@@ -102,7 +110,7 @@ rpc_server(void *p)
         LOGPRINT_ERROR("Error initializing socket: %d", ret);
         return;
     }
-    
+
     while (1)
     {
         int len, ret;
@@ -176,5 +184,5 @@ void app_main(void)
 
     LOGPRINT_INFO("Wifi connect successfull.");
 
-    xTaskCreate(rpc_server, "RPC svr", 4*1024, NULL, 10, &rpcThread);
+    xTaskCreate(rpc_server, "RPC svr", RPCSERVER_STACK_SIZE, NULL, 10, &rpcThread);
 }

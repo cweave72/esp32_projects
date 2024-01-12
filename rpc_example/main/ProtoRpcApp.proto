@@ -2,11 +2,13 @@ syntax = "proto3";
 
 import 'ProtoRpc.proto';
 import 'TestRpc.proto';
+import 'RtosUtilsRpc.proto';
 
 message RpcFrame {
     ProtoRpcHeader header = 1;
 
     oneof callset {
         test.TestCallset test_callset = 2;
+        rtos.RtosUtilsCallset rtosutils_callset = 3;
     }
 }

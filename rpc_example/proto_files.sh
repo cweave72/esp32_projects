@@ -6,5 +6,6 @@ PROTO_PATHS=(
 "$TOOLS_PATH/nanopb/generator/proto"
 "$COMPONENTS_PATH/ProtoRpc/src"
 "$COMPONENTS_PATH/TestRpc/src"
+"$COMPONENTS_PATH/RtosUtils/src"
 "$SCRIPTPATH/main"
 )

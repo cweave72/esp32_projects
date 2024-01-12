@@ -6,6 +6,7 @@
 #include <pb.h>
 #include "ProtoRpc.pb.h"
 #include "TestRpc.pb.h"
+#include "RtosUtilsRpc.pb.h"
 
 #if PB_PROTO_HEADER_VERSION != 40
 #error Regenerate this file with the current version of nanopb generator.
@@ -18,6 +19,7 @@ typedef struct _RpcFrame {
     pb_size_t which_callset;
     union {
         test_TestCallset test_callset;
+        rtos_RtosUtilsCallset rtosutils_callset;
     } callset;
 } RpcFrame;
 
@@ -33,15 +35,18 @@ extern "C" {
 /* Field tags (for use in manual encoding/decoding) */
 #define RpcFrame_header_tag                      1
 #define RpcFrame_test_callset_tag                2
+#define RpcFrame_rtosutils_callset_tag           3
 
 /* Struct field encoding specification for nanopb */
 #define RpcFrame_FIELDLIST(X, a) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  header,            1) \
-X(a, STATIC,   ONEOF,    MESSAGE,  (callset,test_callset,callset.test_callset),   2)
+X(a, STATIC,   ONEOF,    MESSAGE,  (callset,test_callset,callset.test_callset),   2) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (callset,rtosutils_callset,callset.rtosutils_callset),   3)
 #define RpcFrame_CALLBACK NULL
 #define RpcFrame_DEFAULT NULL
 #define RpcFrame_header_MSGTYPE ProtoRpcHeader
 #define RpcFrame_callset_test_callset_MSGTYPE test_TestCallset
+#define RpcFrame_callset_rtosutils_callset_MSGTYPE rtos_RtosUtilsCallset
 
 extern const pb_msgdesc_t RpcFrame_msg;
 
@@ -49,7 +54,7 @@ extern const pb_msgdesc_t RpcFrame_msg;
 #define RpcFrame_fields &RpcFrame_msg
 
 /* Maximum encoded size of messages (where known) */
-#define RpcFrame_size                            140
+#define RpcFrame_size                            749
 
 #ifdef __cplusplus
 } /* extern "C" */
