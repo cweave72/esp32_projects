@@ -14,6 +14,7 @@ function activate_env {
 }
 
 export TOOLS_PATH=$HOME/esp/esp32_tools
+export COMPONENTS_PATH=$HOME/esp/esp32_components
 
 PY3=python3.10
 PROMPT=venv

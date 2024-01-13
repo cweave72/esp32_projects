@@ -7,8 +7,8 @@
 #include "Config.pb.h"
 
 #include "SwTimer.h"
-#include "UdpSocket.h"
 #include "WifiConnect.h"
+#include "UdpRpcServer.h"
 
 static const char *TAG = "[app]";
 static Config config;
@@ -32,15 +32,9 @@ static ProtoRpc_info rpc_info = {
     .callset_offset = offsetof(RpcFrame, callset),
     .frame_fields = RpcFrame_fields,
 };
-
-static uint8_t rcv_msg[2*sizeof(RpcFrame)];
-static uint8_t reply_msg[2*sizeof(RpcFrame)];
 /******************************************************************************/
 
-static UdpSocket udp_sock;
-
-#define RPCSERVER_STACK_SIZE    4*1024
-static TaskHandle_t rpcThread;
+#define RPCSERVER_STACK_SIZE    10*1024
 
 /******************************************************************************
     get_config
@@ -91,64 +85,6 @@ get_config(void)
     return 0;
 }
 
-/******************************************************************************
-    rpc_server
-*//**
-    @brief Description.
-******************************************************************************/
-static void
-rpc_server(void *p)
-{
-    int ret;
-    char addr_str[128];
-
-    (void)p;
-
-    ret = UdpSocket_init(&udp_sock, 13000, 10);
-    if (ret < 0)
-    {
-        LOGPRINT_ERROR("Error initializing socket: %d", ret);
-        return;
-    }
-
-    while (1)
-    {
-        int len, ret;
-        uint32_t reply_size;
-
-        len = UdpSocket_read(&udp_sock, (char *)rcv_msg, sizeof(rcv_msg));
-        if (len > 0)
-        {
-            UDPSOCKET_GET_ADDR(udp_sock.source_addr, addr_str);
-            LOGPRINT_INFO("Received %d bytes from %s:", len, addr_str);
-
-            ProtoRpc_server(
-                &rpc_info,
-                resolvers,
-                NUM_RESOLVERS,
-                rcv_msg,
-                len,
-                reply_msg,
-                sizeof(reply_msg),
-                &reply_size);
-
-            if (reply_size > 0)
-            {
-                ret = UdpSocket_write(&udp_sock, (char *)reply_msg, reply_size);
-                if (ret == 0)
-                {
-                    LOGPRINT_INFO("Wrote %d bytes.", (unsigned int)reply_size);
-                }
-            }
-        }
-        else if (len == 0)
-        {
-            continue;
-        }
-    }
-}
-
-
 void app_main(void)
 {
     esp_err_t ret;
@@ -182,7 +118,13 @@ void app_main(void)
         return;
     }
 
-    LOGPRINT_INFO("Wifi connect successfull.");
-
-    xTaskCreate(rpc_server, "RPC svr", RPCSERVER_STACK_SIZE, NULL, 10, &rpcThread);
+    status = UdpRpcServer_Task_init(
+        &rpc_info,
+        resolvers,
+        NUM_RESOLVERS,
+        RPCSERVER_STACK_SIZE);
+    if (status < 0)
+    {
+        LOGPRINT_ERROR("Error initializing UdpRpcServer.");
+    }
 }

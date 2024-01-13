@@ -1,5 +1,6 @@
 -e ${TOOLS_PATH}/api_generator/
 -e ${TOOLS_PATH}/protorpc/
+-e ${COMPONENTS_PATH}/RtosUtils/python_api
 -e .
 
 protobuf
