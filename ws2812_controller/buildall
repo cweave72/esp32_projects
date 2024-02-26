@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# Initialize the workspace.
+found_init=0
+current_dir=$(pwd)
+while [[ "$current_dir" != "/" ]]; do
+    if [[ -f "$current_dir/init_ws.sh" ]]; then
+        echo "Found init_ws.sh at $current_dir, sourcing."
+        source $current_dir/init_ws.sh
+        found_init=1
+        break
+    fi
+    # Move 1 directory up.
+    current_dir=$(dirname "$current_dir")
+done
+
+if [[ $found_init == 0 ]]; then
+    echo "Could not find init_ws.sh".
+    exit
+fi
+
+function Usage {
+    echo "Usage:"
+    echo "   $0 clean"
+    echo "   $0 make"
+    echo "   $0 flash"
+    echo "   $0 mon"
+    echo "   $0 flashmon"
+    echo "   $0 flash-nvs"
+    echo "   $0 menuconfig"
+    echo "   $0 idf <>"
+    exit
+}
+
+#ESP_DIR=$HOME/esp/esp-idf
+#EXPORT_SH=$ESP_DIR/export.sh
+#
+#if [[ ":$PATH:" == *"$ESP_DIR/tools:"* ]]; then
+#    echo "ESP environment is already activated."
+#else
+#    echo "=============================================================="
+#    echo "ESP environment is not activated. Run . $EXPORT_SH in your shell."
+#    echo "=============================================================="
+#    . $EXPORT_SH
+#fi
+#
+#MONITOR_PORT="/dev/ttyUSB0"
+#export IDF_TARGET=esp32
+#export COMPONENTS_PATH=$HOME/esp/esp32_components
+#export ESP32_TOOLS=$HOME/esp/esp32_tools
+
+
+function build {
+    idf.py build "$@"
+}
+
+function flash {
+    idf.py -p $MONITOR_PORT flash
+}
+
+function nvsflash {
+    idf.py -p $MONITOR_PORT nvs-flash
+}
+
+function monitor {
+    idf.py -p $MONITOR_PORT monitor -b 115200
+}
+
+if [[ "$#" == 0 ]]; then
+    Usage
+fi
+
+if [[ "$1" == "clean" ]]; then
+    idf.py fullclean
+    exit
+fi
+
+if [[ "$1" == "menuconfig" ]]; then
+    idf.py menuconfig
+    exit
+fi
+
+if [[ "$1" == "make" ]]; then
+    shift
+    build "$@"
+fi
+
+if [[ "$1" == "flash" ]]; then
+    flash
+fi
+
+if [[ "$1" == "mon" ]]; then
+    monitor
+fi
+
+if [[ "$1" == "flash-nvs" ]]; then
+    nvsflash
+fi
+
+if [[ "$1" == "flashmon" ]]; then
+    flash && monitor
+fi
+
+if [[ "$1" == "idf" ]]; then
+    shift
+    idf.py "$@"
+fi

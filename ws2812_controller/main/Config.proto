@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+import "nanopb.proto";
+
+message WifiConfig {
+    string ssid = 1 [(nanopb).max_size = 32];
+    string pass = 2 [(nanopb).max_size = 64];
+}
+
+message NetConfig {
+    bool use_dhcp = 1;
+    string ip = 2 [(nanopb).max_size = 32];
+    string netmask = 3 [(nanopb).max_size = 32];
+    string gw = 4 [(nanopb).max_size = 32];
+    string hostname = 5 [(nanopb).max_size = 64];
+}
+
+message Config {
+    WifiConfig wifi_config = 1;
+    NetConfig net_config = 2;
+}
