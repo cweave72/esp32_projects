@@ -12,6 +12,7 @@ message NetConfig {
     string ip = 2 [(nanopb).max_size = 32];
     string netmask = 3 [(nanopb).max_size = 32];
     string gw = 4 [(nanopb).max_size = 32];
+    string hostname = 5 [(nanopb).max_size = 64];
 }
 
 message Config {

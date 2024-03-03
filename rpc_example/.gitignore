@@ -1,7 +1,9 @@
 config.yaml
+*.lock
 *.log
 **/.venv
 **/*.egg-info
 **/__pycache__
+managed_components/
 python/config
 python/rpc/lib

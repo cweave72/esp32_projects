@@ -71,7 +71,9 @@ Step 1 adds the file `idf_component.yml` to `main/`. Step 2 adds the directory
 ## Building and Flashing
 
 Build: `./buildall make`
+
 Flash NVS: `buildall flash-nvs`
+
 Flash and monitor: `./buildall flashmon`
 
 ## Building the python RPC libs

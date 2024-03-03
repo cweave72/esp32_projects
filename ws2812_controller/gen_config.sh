@@ -1,7 +1,6 @@
 #!/bin/bash
 #SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 SCRIPTPATH=$(dirname $(realpath "$0"))
-#source $SCRIPTPATH/paths.sh
 
 PROTO_INC="\
 -i $ESP32_TOOLS/nanopb/generator/proto \

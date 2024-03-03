@@ -1,6 +1,5 @@
 #!/bin/bash
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-source $SCRIPTPATH/paths.sh
 source $SCRIPTPATH/proto_files.sh
 
 loglevel=debug

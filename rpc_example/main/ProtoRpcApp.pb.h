@@ -54,7 +54,7 @@ extern const pb_msgdesc_t RpcFrame_msg;
 #define RpcFrame_fields &RpcFrame_msg
 
 /* Maximum encoded size of messages (where known) */
-#define RpcFrame_size                            749
+#define RpcFrame_size                            925
 
 #ifdef __cplusplus
 } /* extern "C" */

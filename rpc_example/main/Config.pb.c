@@ -12,7 +12,7 @@ PB_BIND(WifiConfig, WifiConfig, AUTO)
 PB_BIND(NetConfig, NetConfig, AUTO)
 
 
-PB_BIND(Config, Config, AUTO)
+PB_BIND(Config, Config, 2)
 
 
 

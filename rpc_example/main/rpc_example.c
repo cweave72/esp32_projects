@@ -2,39 +2,41 @@
 #include "nvs_flash.h"
 #include "ProtoRpc.h"
 #include "PbGeneric.h"
+#include "SwTimer.h"
 #include "LogPrint.h"
 #include "ProtoRpcApp.pb.h"
 #include "Config.pb.h"
+#include "mdns.h"
 
-#include "SwTimer.h"
 #include "WifiConnect.h"
 #include "UdpRpcServer.h"
+#include "TcpRpcServer.h"
+#include "TcpEcho.h"
+#include "UdpEcho.h"
 
 static const char *TAG = "[app]";
 static Config config;
 
-#include "TestRpc.h"
-#include "RtosUtilsRpc.h"
+static TcpEcho tcp_echo;
+static UdpEcho udp_echo;
+static TcpRpcServer tcp_rpc;
+static UdpRpcServer udp_rpc;
 
 /******************************************************************************/
 /** @brief RPC Declarations */
+#include "TestRpc.h"
+#include "RtosUtilsRpc.h"
+
+#define RPCSERVER_STACK_SIZE    4*1024
 
 static ProtoRpc_Resolver_Entry resolvers[] = {
     PROTORPC_ADD_CALLSET(RpcFrame_test_callset_tag, TestRpc_resolver),
     PROTORPC_ADD_CALLSET(RpcFrame_rtosutils_callset_tag, RtosUtilsRpc_resolver),
 };
 
-#define NUM_RESOLVERS   PROTORPC_ARRAY_LENGTH(resolvers)
-
-static ProtoRpc_info rpc_info = { 
-    .header_offset = offsetof(RpcFrame, header),
-    .which_callset_offset = offsetof(RpcFrame, which_callset),
-    .callset_offset = offsetof(RpcFrame, callset),
-    .frame_fields = RpcFrame_fields,
-};
+static ProtoRpc rpc = ProtoRpc_init(RpcFrame, resolvers);
 /******************************************************************************/
 
-#define RPCSERVER_STACK_SIZE    10*1024
 
 /******************************************************************************
     get_config
@@ -81,6 +83,7 @@ get_config(void)
     LOGPRINT_INFO("ip = %s", net_config->ip);
     LOGPRINT_INFO("netmask = %s", net_config->netmask);
     LOGPRINT_INFO("gw = %s", net_config->gw);
+    LOGPRINT_INFO("hostname = %s", net_config->hostname);
 
     return 0;
 }
@@ -89,6 +92,11 @@ void app_main(void)
 {
     esp_err_t ret;
     int status;
+
+    /** @brief Allow component-scope log level control.
+        See LogPrint_local.h
+     */
+    esp_log_level_set("*", ESP_LOG_DEBUG);
 
     /** @brief Initialize NVS */
     ret = nvs_flash_init();
@@ -101,10 +109,7 @@ void app_main(void)
     ESP_ERROR_CHECK(ret);
 
     status = get_config();
-    if (status != 0)
-    {
-        return;
-    }
+    if (status != 0) return;
     
     ret = WifiConnect_init(
         config.wifi_config.ssid,
@@ -113,18 +118,55 @@ void app_main(void)
         config.net_config.ip,
         config.net_config.netmask,
         config.net_config.gw);
-    if (ret != ESP_OK)
+    if (ret != ESP_OK)  return;
+
+    ret = mdns_init();
+    if (ret == ESP_OK)
     {
-        return;
+        mdns_hostname_set(config.net_config.hostname);
+        //mdns_instance_name_set("First esp32 board");
+    }
+    else
+    {
+        LOGPRINT_ERROR("mdns init failed (ret=%d).", (int) ret);
     }
 
-    status = UdpRpcServer_Task_init(
-        &rpc_info,
-        resolvers,
-        NUM_RESOLVERS,
-        RPCSERVER_STACK_SIZE);
-    if (status < 0)
-    {
-        LOGPRINT_ERROR("Error initializing UdpRpcServer.");
-    }
+    /* Start UDP Rcp server. */
+    status = UdpRpcServer_init(
+        &udp_rpc,
+        &rpc,
+        13000, 
+        RPCSERVER_STACK_SIZE,
+        20);
+    if (status < 0) LOGPRINT_ERROR("Error initializing UdpRpcServer.");
+
+    /* Start TCP Rcp server. */
+    status = TcpRpcServer_init(
+        &tcp_rpc,
+        &rpc,
+        13001, 
+        RPCSERVER_STACK_SIZE,
+        20);
+    if (status < 0) LOGPRINT_ERROR("Error initializing TcpRpcServer.");
+
+    status = UdpEcho_init(
+        &udp_echo,
+        12000,
+        NULL,
+        2*1024,
+        4*1024,
+        "UDP Echo",
+        20, 5);
+    if (status < 0) LOGPRINT_ERROR("Error initializing Udp Echo server.");
+
+    status = TcpEcho_init(
+        &tcp_echo,
+        12001,
+        NULL,
+        1024,
+        4*1024,
+        "TCP Echo",
+        20);
+    if (status < 0) LOGPRINT_ERROR("Error initializing Tcp Echo server.");
+
 }

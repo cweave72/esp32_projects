@@ -20,6 +20,7 @@ typedef struct _NetConfig {
     char ip[32];
     char netmask[32];
     char gw[32];
+    char hostname[64];
 } NetConfig;
 
 typedef struct _Config {
@@ -36,10 +37,10 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define WifiConfig_init_default                  {"", ""}
-#define NetConfig_init_default                   {0, "", "", ""}
+#define NetConfig_init_default                   {0, "", "", "", ""}
 #define Config_init_default                      {false, WifiConfig_init_default, false, NetConfig_init_default}
 #define WifiConfig_init_zero                     {"", ""}
-#define NetConfig_init_zero                      {0, "", "", ""}
+#define NetConfig_init_zero                      {0, "", "", "", ""}
 #define Config_init_zero                         {false, WifiConfig_init_zero, false, NetConfig_init_zero}
 
 /* Field tags (for use in manual encoding/decoding) */
@@ -49,6 +50,7 @@ extern "C" {
 #define NetConfig_ip_tag                         2
 #define NetConfig_netmask_tag                    3
 #define NetConfig_gw_tag                         4
+#define NetConfig_hostname_tag                   5
 #define Config_wifi_config_tag                   1
 #define Config_net_config_tag                    2
 
@@ -63,7 +65,8 @@ X(a, STATIC,   SINGULAR, STRING,   pass,              2)
 X(a, STATIC,   SINGULAR, BOOL,     use_dhcp,          1) \
 X(a, STATIC,   SINGULAR, STRING,   ip,                2) \
 X(a, STATIC,   SINGULAR, STRING,   netmask,           3) \
-X(a, STATIC,   SINGULAR, STRING,   gw,                4)
+X(a, STATIC,   SINGULAR, STRING,   gw,                4) \
+X(a, STATIC,   SINGULAR, STRING,   hostname,          5)
 #define NetConfig_CALLBACK NULL
 #define NetConfig_DEFAULT NULL
 
@@ -85,8 +88,8 @@ extern const pb_msgdesc_t Config_msg;
 #define Config_fields &Config_msg
 
 /* Maximum encoded size of messages (where known) */
-#define Config_size                              203
-#define NetConfig_size                           101
+#define Config_size                              269
+#define NetConfig_size                           166
 #define WifiConfig_size                          98
 
 #ifdef __cplusplus
