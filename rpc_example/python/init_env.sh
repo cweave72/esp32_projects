@@ -13,8 +13,9 @@ function activate_env {
     fi
 }
 
-export TOOLS_PATH=$HOME/esp/esp32_tools
-export COMPONENTS_PATH=$HOME/esp/esp32_components
+workspace=$HOME/esp32_workspace
+export TOOLS_PATH=$workspace/tools
+export COMPONENTS_PATH=$workspace/components
 
 PY3=python3.10
 PROMPT=venv

@@ -6,5 +6,6 @@ PROTO_PATHS=(
 "$COMPONENTS_PATH/ProtoRpc/src"
 "$COMPONENTS_PATH/TestRpc/src"
 "$COMPONENTS_PATH/RtosUtils/src"
+"$COMPONENTS_PATH/Lfs_Part/src"
 "$SCRIPTPATH/main"
 )

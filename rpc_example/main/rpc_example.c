@@ -7,6 +7,7 @@
 #include "ProtoRpcApp.pb.h"
 #include "Config.pb.h"
 #include "mdns.h"
+#include "CheckCond.h"
 
 #include "WifiConnect.h"
 #include "UdpRpcServer.h"
@@ -26,12 +27,14 @@ static UdpRpcServer udp_rpc;
 /** @brief RPC Declarations */
 #include "TestRpc.h"
 #include "RtosUtilsRpc.h"
+#include "Lfs_PartRpc.h"
 
 #define RPCSERVER_STACK_SIZE    4*1024
 
 static ProtoRpc_Resolver_Entry resolvers[] = {
     PROTORPC_ADD_CALLSET(RpcFrame_test_callset_tag, TestRpc_resolver),
     PROTORPC_ADD_CALLSET(RpcFrame_rtosutils_callset_tag, RtosUtilsRpc_resolver),
+    PROTORPC_ADD_CALLSET(RpcFrame_lfs_callset_tag, Lfs_PartRpc_resolver),
 };
 
 static ProtoRpc rpc = ProtoRpc_init(RpcFrame, resolvers);
@@ -88,6 +91,90 @@ get_config(void)
     return 0;
 }
 
+#include "Lfs_Part.h"
+#include "lfs_helpers.h"
+static Lfs_Part_t lpfs = { 0 };
+
+static void
+ls(lfs_t *lfs, const char *path)
+{
+    int ret;
+    lfs_dir_t dir;
+    struct lfs_info info;
+
+    ret = lfs_dir_open(lfs, &dir, path);
+    if (ret < 0)
+    {
+        LOGPRINT_ERROR("Failed open dir %s", path);
+        return;
+    }
+
+    LOGPRINT_INFO("Directory listing: %s", path);
+    while (1)
+    {
+        ret = lfs_dir_read(lfs, &dir, &info);
+        if (ret > 0)
+        {
+            LOGPRINT_INFO("%c %u: %s",
+                (info.type == LFS_TYPE_REG) ? 'f' : 'd',
+                (unsigned int)info.size,
+                info.name);
+        }
+        else 
+        {
+            lfs_dir_close(lfs, &dir);
+            break;
+        }
+    }
+}
+
+static void
+update_bootcount(Lfs_Part_t *lpfs)
+{
+    lfs_t *lfs = &lpfs->lfs;
+    lfs_file_t fp;
+    int ret;
+    unsigned int boot_count;
+
+    if (lfs_exists(lfs, "boot_count.txt") != LFS_ERR_OK)
+    {
+        LOGPRINT_INFO("Creating boot_count.txt");
+
+        ret = lfs_file_open(lfs, &fp, "boot_count.txt",
+            LFS_O_RDWR | LFS_O_CREAT);
+        CHECK_COND_VOID_RETURN_MSG(ret < 0, "Failed to open file.");
+
+        boot_count = 0;
+
+        ret = lfs_file_write(lfs, &fp, &boot_count, sizeof(boot_count));
+        if (ret < 0)
+        {
+            LOGPRINT_ERROR("Failed on write: %d", ret);
+            lfs_file_close(lfs, &fp);
+            return;
+        }
+
+        lfs_file_close(lfs, &fp);
+    }
+
+    ret = lfs_file_open(lfs, &fp, "boot_count.txt", LFS_O_RDWR);
+    CHECK_COND_VOID_RETURN_MSG(ret < 0, "Failed to open file (exists).");
+
+    ret = lfs_file_read(lfs, &fp, &boot_count, sizeof(boot_count));
+    CHECK_COND_VOID_RETURN_MSG(ret < 0, "Failed to read.");
+
+    LOGPRINT_INFO("boot_count = %u", boot_count);
+
+    boot_count++;
+
+    lfs_file_rewind(lfs, &fp);
+    ret = lfs_file_write(lfs, &fp, &boot_count, sizeof(boot_count));
+    CHECK_COND_VOID_RETURN_MSG(ret < 0, "Failed to write.");
+
+    ret = lfs_file_close(lfs, &fp);
+    CHECK_COND_VOID_RETURN_MSG(ret < 0, "Failed close.");
+}
+
 void app_main(void)
 {
     esp_err_t ret;
@@ -110,6 +197,19 @@ void app_main(void)
 
     status = get_config();
     if (status != 0) return;
+
+
+    ret = Lfs_Part_init(&lpfs, "littlefs", &status);
+    if (ret == LFS_ERR_OK)
+    {
+        Lfs_Part_register(&lpfs);
+        update_bootcount(&lpfs);
+    }
+
+    ls(&lpfs.lfs, "/");
+    
+    //ret = lfs_format(&lpfs.lfs, &lpfs.cfg);
+    //LOGPRINT_INFO("ret = %d", ret);
     
     ret = WifiConnect_init(
         config.wifi_config.ssid,

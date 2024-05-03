@@ -7,6 +7,7 @@
 #include "ProtoRpc.pb.h"
 #include "TestRpc.pb.h"
 #include "RtosUtilsRpc.pb.h"
+#include "Lfs_PartRpc.pb.h"
 
 #if PB_PROTO_HEADER_VERSION != 40
 #error Regenerate this file with the current version of nanopb generator.
@@ -20,6 +21,7 @@ typedef struct _RpcFrame {
     union {
         test_TestCallset test_callset;
         rtos_RtosUtilsCallset rtosutils_callset;
+        lfspart_LfsCallset lfs_callset;
     } callset;
 } RpcFrame;
 
@@ -36,17 +38,20 @@ extern "C" {
 #define RpcFrame_header_tag                      1
 #define RpcFrame_test_callset_tag                2
 #define RpcFrame_rtosutils_callset_tag           3
+#define RpcFrame_lfs_callset_tag                 4
 
 /* Struct field encoding specification for nanopb */
 #define RpcFrame_FIELDLIST(X, a) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  header,            1) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (callset,test_callset,callset.test_callset),   2) \
-X(a, STATIC,   ONEOF,    MESSAGE,  (callset,rtosutils_callset,callset.rtosutils_callset),   3)
+X(a, STATIC,   ONEOF,    MESSAGE,  (callset,rtosutils_callset,callset.rtosutils_callset),   3) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (callset,lfs_callset,callset.lfs_callset),   4)
 #define RpcFrame_CALLBACK NULL
 #define RpcFrame_DEFAULT NULL
 #define RpcFrame_header_MSGTYPE ProtoRpcHeader
 #define RpcFrame_callset_test_callset_MSGTYPE test_TestCallset
 #define RpcFrame_callset_rtosutils_callset_MSGTYPE rtos_RtosUtilsCallset
+#define RpcFrame_callset_lfs_callset_MSGTYPE lfspart_LfsCallset
 
 extern const pb_msgdesc_t RpcFrame_msg;
 

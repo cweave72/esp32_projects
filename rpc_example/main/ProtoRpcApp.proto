@@ -3,6 +3,7 @@ syntax = "proto3";
 import 'ProtoRpc.proto';
 import 'TestRpc.proto';
 import 'RtosUtilsRpc.proto';
+import 'Lfs_PartRpc.proto';
 
 message RpcFrame {
     ProtoRpcHeader header = 1;
@@ -10,5 +11,6 @@ message RpcFrame {
     oneof callset {
         test.TestCallset test_callset = 2;
         rtos.RtosUtilsCallset rtosutils_callset = 3;
+        lfspart.LfsCallset lfs_callset = 4;
     }
 }

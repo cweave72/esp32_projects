@@ -18,6 +18,7 @@ set(rpc_proto_inc
     ${components_path}/ProtoRpc/src
     ${components_path}/TestRpc/src
     ${components_path}/RtosUtils/src
+    ${components_path}/Lfs_Part/src
     )
 
 include(${nanopb_path}/nanopb.cmake)
