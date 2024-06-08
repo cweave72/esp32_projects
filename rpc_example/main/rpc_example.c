@@ -23,13 +23,16 @@ static UdpEcho udp_echo;
 static TcpRpcServer tcp_rpc;
 static UdpRpcServer udp_rpc;
 
+static uint8_t rpc_call_frame[RpcFrame_size]  = { 0 };
+static uint8_t rpc_reply_frame[RpcFrame_size] = { 0 };
+
 /******************************************************************************/
 /** @brief RPC Declarations */
 #include "TestRpc.h"
 #include "RtosUtilsRpc.h"
 #include "Lfs_PartRpc.h"
 
-#define RPCSERVER_STACK_SIZE    4*1024
+#define RPCSERVER_STACK_SIZE    8*1024
 
 static ProtoRpc_Resolver_Entry resolvers[] = {
     PROTORPC_ADD_CALLSET(RpcFrame_test_callset_tag, TestRpc_resolver),
@@ -37,7 +40,11 @@ static ProtoRpc_Resolver_Entry resolvers[] = {
     PROTORPC_ADD_CALLSET(RpcFrame_lfs_callset_tag, Lfs_PartRpc_resolver),
 };
 
-static ProtoRpc rpc = ProtoRpc_init(RpcFrame, resolvers);
+static ProtoRpc rpc = ProtoRpc_init(RpcFrame,
+                                    rpc_call_frame,
+                                    rpc_reply_frame,
+                                    resolvers);
+
 /******************************************************************************/
 
 
@@ -136,7 +143,7 @@ update_bootcount(Lfs_Part_t *lpfs)
     int ret;
     unsigned int boot_count;
 
-    if (lfs_exists(lfs, "boot_count.txt") != LFS_ERR_OK)
+    if (lfs_exists(lfs, "boot_count.txt", NULL) != LFS_ERR_OK)
     {
         LOGPRINT_INFO("Creating boot_count.txt");
 
@@ -203,6 +210,7 @@ void app_main(void)
     if (ret == LFS_ERR_OK)
     {
         Lfs_Part_register(&lpfs);
+        Lfs_PartRpc_init(&lpfs);
         update_bootcount(&lpfs);
     }
 

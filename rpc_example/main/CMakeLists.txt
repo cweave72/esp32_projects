@@ -8,6 +8,13 @@ idf_component_register(
     INCLUDE_DIRS "."
     )
 
+# HANDY: This saves the preprocessor output so that macro expansion can be inspected.
+#target_compile_options(
+#    ${COMPONENT_LIB}
+#    PUBLIC
+#    -save-temps
+#    )
+
 set(components_path $ENV{COMPONENTS_PATH})
 set(nanopb_path $ENV{ESP32_TOOLS}/nanopb)
 
