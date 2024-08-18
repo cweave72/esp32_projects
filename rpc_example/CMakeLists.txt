@@ -11,7 +11,9 @@ if (NOT DEFINED ENV{COMPONENTS_PATH})
 endif()
 
 message(STATUS "Setting EXTRA_COMPONENT_DIRS=$ENV{COMPONENTS_PATH}")
-set(EXTRA_COMPONENT_DIRS $ENV{COMPONENTS_PATH})
+set(EXTRA_COMPONENT_DIRS
+    $ENV{COMPONENTS_PATH}
+    )
 
 add_compile_options(-fmax-errors=5)
 project(rpc_example)

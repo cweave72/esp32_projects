@@ -14,6 +14,10 @@
 #include "TcpRpcServer.h"
 #include "TcpEcho.h"
 #include "UdpEcho.h"
+#include "RtosUtils.h"
+#include "lua_thread.h"
+#include "Fs_Api.h"
+#include "Lfs_Api.h"
 
 static const char *TAG = "[app]";
 static Config config;
@@ -31,6 +35,7 @@ static uint8_t rpc_reply_frame[RpcFrame_size] = { 0 };
 #include "TestRpc.h"
 #include "RtosUtilsRpc.h"
 #include "Lfs_PartRpc.h"
+#include "lua_thread_rpc.h"
 
 #define RPCSERVER_STACK_SIZE    8*1024
 
@@ -38,6 +43,7 @@ static ProtoRpc_Resolver_Entry resolvers[] = {
     PROTORPC_ADD_CALLSET(RpcFrame_test_callset_tag, TestRpc_resolver),
     PROTORPC_ADD_CALLSET(RpcFrame_rtosutils_callset_tag, RtosUtilsRpc_resolver),
     PROTORPC_ADD_CALLSET(RpcFrame_lfs_callset_tag, Lfs_PartRpc_resolver),
+    PROTORPC_ADD_CALLSET(RpcFrame_lua_callset_tag, lua_thread_rpc_resolver),
 };
 
 static ProtoRpc rpc = ProtoRpc_init(RpcFrame,
@@ -47,6 +53,13 @@ static ProtoRpc rpc = ProtoRpc_init(RpcFrame,
 
 /******************************************************************************/
 
+static Fs_Api fs;
+static Lua_Thread lt = {
+    .fs = &fs,
+    .taskName = "lua thread",
+    .taskStackSize = 40*1024,
+    .taskPrio = 10
+};
 
 /******************************************************************************
     get_config
@@ -276,5 +289,10 @@ void app_main(void)
         "TCP Echo",
         20);
     if (status < 0) LOGPRINT_ERROR("Error initializing Tcp Echo server.");
+
+    Lfs_Api_init(&fs, "littlefs");
+    status = Lua_Thread_init(&lt);
+    if (status < 0) LOGPRINT_ERROR("Error initializing lua thread.");
+    lua_thread_rpc_init(&lt);
 
 }

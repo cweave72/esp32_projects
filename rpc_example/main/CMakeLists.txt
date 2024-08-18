@@ -1,7 +1,8 @@
+set(name "rpc_example")
 set(srcs "rpc_example.c"
          "Config.pb.c"
          "ProtoRpcApp.pb.c"
-         )
+)
 
 idf_component_register(
     SRCS ${srcs}
@@ -26,6 +27,7 @@ set(rpc_proto_inc
     ${components_path}/TestRpc/src
     ${components_path}/RtosUtils/src
     ${components_path}/Lfs_Part/src
+    ${components_path}/lua/src
     )
 
 include(${nanopb_path}/nanopb.cmake)
@@ -64,4 +66,15 @@ add_custom_command(
     COMMAND ${config_generator}
     VERBATIM
     DEPENDS ${config_proto} ${config_data}
+    )
+
+component_compile_options(
+    "-Wno-error=format"
+    "-Wno-format"
+)
+
+target_link_options(
+    ${COMPONENT_LIB}
+    PRIVATE
+    -Wl,-Map=${CMAKE_CURRENT_SOURCE_DIR}/${name}.map
     )

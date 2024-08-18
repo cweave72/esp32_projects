@@ -4,6 +4,7 @@ import 'ProtoRpc.proto';
 import 'TestRpc.proto';
 import 'RtosUtilsRpc.proto';
 import 'Lfs_PartRpc.proto';
+import 'lua_thread_rpc.proto';
 
 message RpcFrame {
     ProtoRpcHeader header = 1;
@@ -12,5 +13,6 @@ message RpcFrame {
         test.TestCallset test_callset = 2;
         rtos.RtosUtilsCallset rtosutils_callset = 3;
         lfspart.LfsCallset lfs_callset = 4;
+        lua.LuaCallset lua_callset = 5;
     }
 }
